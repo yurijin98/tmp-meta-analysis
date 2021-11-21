@@ -1,9 +1,24 @@
+---
+title: "plot_display"
+author: "Yuli Jin"
+date: "2021/11/21"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=F,message = F , echo = T)
+knitr::opts_chunk$set(fig.width=8, fig.height=4,fig.align = "center")
 library(tidyverse)
 library(meta)
 library(metafor)
 library(openxlsx)
 library(stringr)
+library(grid)
+```
 
+## Data processing
+
+```{r}
 data<-read.xlsx("Final Studies_Meta Analysis_1.3.xlsx",startRow = 2)
 meta <- data[,c(1,3,6:8,10:12)]
 names(meta) <- c("StudyID","Author" ,"Size", "MeanDiff_SBP", "MeanDiff_DBP", "SE_SBP", "SE_DBP", "Duration_M")
@@ -12,34 +27,27 @@ names(meta) <- c("StudyID","Author" ,"Size", "MeanDiff_SBP", "MeanDiff_DBP", "SE
 meta[2:3,1:2]=meta[1,1:2]
 # add duration
 meta[c(2,6),'Duration_M']=c('2','6')
-
-#str_match_all(meta$SE_SBP,"-*\\d+.\\d+") %>% map(`[`,2)
 # input nan in SE_SBP and SE_DBP
 tmp_sbp<-str_extract_all(meta$SE_SBP,"-*\\d+.\\d+")%>% map(`[`,2) %>% unlist() %>%  na.omit() 
 meta$SE_SBP[c(2,7)]=tmp_sbp
 tmp_dbp<-str_extract_all(meta$SE_DBP,"-*\\d+.\\d+")%>% map(`[`,2) %>% unlist() %>%  na.omit() 
 meta$SE_DBP[c(2,7)]=tmp_dbp
-
 # manually change Mean_Diff_SBP& DBP of study ID 5:
 meta[7,c('MeanDiff_SBP','MeanDiff_DBP')]=c('-2.54','-3.95')
-
 # extract the first number and omit the content after \n
-meta<-meta %>% mutate_at(c('MeanDiff_SBP','MeanDiff_DBP','SE_SBP','SE_DBP'),~str_extract(.,"-*\\d+.\\d+") %>% as.numeric(.)) 
-# meta$MeanDiff_SBP<-str_extract(meta$MeanDiff_SBP, "-*\\d+.\\d+") %>% as.numeric()
-# meta$MeanDiff_DBP<-str_extract(meta$MeanDiff_DBP, "-*\\d+.\\d+") %>% as.numeric()
-# meta$SE_SBP<-str_extract(meta$SE_SBP, "-*\\d+.\\d+") %>% as.numeric()
-# meta$SE_DBP<-str_extract(meta$SE_DBP, "-*\\d+.\\d+") %>% as.numeric()
-
+meta<-meta %>% mutate_at(c('MeanDiff_SBP','MeanDiff_DBP','SE_SBP','SE_DBP'),~str_extract(.,"-*\\d+.\\d+") %>% as.numeric(.))
 # drop na columns
 meta<-meta[c(!is.na(meta$SE_DBP)),]
-
 # delete et al
 meta$Author<-str_extract(meta$Author,'\\w+')
 meta
+```
 
+## forest plot & funnel plot
+
+```{r}
 rownames(meta)<-seq(1:dim(meta)[1])
 meta$Author=paste(rownames(meta),meta$Author,sep='.')
-meta <- meta[order(meta$StudyID),]
 # ?metagen
 # ?funnel.meta
 meta_SBP <- metagen(TE = MeanDiff_SBP, seTE = SE_SBP, studlab = Author,data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "SBP", prediction = TRUE)
@@ -47,22 +55,23 @@ forest_SBP <- forest.meta(meta_SBP, layout = "RevMan5")
 grid.text("SBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
 funnel.meta(meta_SBP,studlab = TRUE,cex.studlab = 1,cex = 2,pch=16,pos.studlab=3,xlim=c(-15,15))
 title(main = "SBP Funnel Plot",  cex.main = 1.5,font.main = 1)
+```
 
-# title(main = "Main title", sub = "Sub-title",
-#       xlab = "X axis", ylab = "Y axis",
-#       cex.main = 2,   font.main= 4, col.main= "red",
-#       cex.sub = 0.75, font.sub = 3, col.sub = "green",
-#       col.lab ="darkblue")
 
-#meta_DBP
+
+
+```{r}
+
 meta_DBP <- metagen(TE = MeanDiff_DBP, seTE = SE_DBP, studlab = Author, data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "DBP", prediction = TRUE)
 forest_DBP <- forest.meta(meta_DBP, layout = "RevMan5")
 grid.text("DBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
 funnel.meta(meta_DBP,  studlab = TRUE,cex.studlab = 1,cex = 2,pch=16,pos.studlab=3,xlim=c(-8,8))
 title(main = "DBP Funnel Plot",  cex.main = 1.5,font.main = 1)
+```
 
+## Metareg
 
-
+```{r}
 
 M<-meta$Duration_M%>% as.numeric()
 duration <- M*30
@@ -84,21 +93,5 @@ meta_DBP_reg
 bubble(meta_DBP_reg, studlab = TRUE)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
