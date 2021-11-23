@@ -11,31 +11,27 @@ names(meta) <- c("StudyID","Author" ,"Size", "MeanDiff_SBP", "MeanDiff_DBP", "SE
 # add study ID and Author to 2nd 3rd row
 meta[2:3,1:2]=meta[1,1:2]
 # add duration
-meta[c(2,6),'Duration_M']=c('2','6')
-
-#str_match_all(meta$SE_SBP,"-*\\d+.\\d+") %>% map(`[`,2)
+meta[c(2,3,6),'Duration_M']=c('2','2','6')
 # input nan in SE_SBP and SE_DBP
 tmp_sbp<-str_extract_all(meta$SE_SBP,"-*\\d+.\\d+")%>% map(`[`,2) %>% unlist() %>%  na.omit() 
 meta$SE_SBP[c(2,7)]=tmp_sbp
 tmp_dbp<-str_extract_all(meta$SE_DBP,"-*\\d+.\\d+")%>% map(`[`,2) %>% unlist() %>%  na.omit() 
 meta$SE_DBP[c(2,7)]=tmp_dbp
+# input SE study ID 1(placebo)
+meta[3,c('SE_SBP','SE_DBP')]=c('3.004','2.593')
 
 # manually change Mean_Diff_SBP& DBP of study ID 5:
 meta[7,c('MeanDiff_SBP','MeanDiff_DBP')]=c('-2.54','-3.95')
-
 # extract the first number and omit the content after \n
-meta<-meta %>% mutate_at(c('MeanDiff_SBP','MeanDiff_DBP','SE_SBP','SE_DBP'),~str_extract(.,"-*\\d+.\\d+") %>% as.numeric(.)) 
-# meta$MeanDiff_SBP<-str_extract(meta$MeanDiff_SBP, "-*\\d+.\\d+") %>% as.numeric()
-# meta$MeanDiff_DBP<-str_extract(meta$MeanDiff_DBP, "-*\\d+.\\d+") %>% as.numeric()
-# meta$SE_SBP<-str_extract(meta$SE_SBP, "-*\\d+.\\d+") %>% as.numeric()
-# meta$SE_DBP<-str_extract(meta$SE_DBP, "-*\\d+.\\d+") %>% as.numeric()
-
+meta<-meta %>% mutate_at(c('MeanDiff_SBP','MeanDiff_DBP','SE_SBP','SE_DBP'),~str_extract(.,"-*\\d+.\\d+") %>% as.numeric(.))
 # drop na columns
 meta<-meta[c(!is.na(meta$SE_DBP)),]
-
 # delete et al
 meta$Author<-str_extract(meta$Author,'\\w+')
+# adjust the mean of study ID 6 into -4.8 and -3.2
+meta[8,c('MeanDiff_SBP','MeanDiff_DBP')]=-1*meta[8,c('MeanDiff_SBP','MeanDiff_DBP')]
 meta
+
 
 rownames(meta)<-seq(1:dim(meta)[1])
 meta$Author=paste(rownames(meta),meta$Author,sep='.')
@@ -45,7 +41,7 @@ meta <- meta[order(meta$StudyID),]
 meta_SBP <- metagen(TE = MeanDiff_SBP, seTE = SE_SBP, studlab = Author,data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "SBP", prediction = TRUE)
 forest_SBP <- forest.meta(meta_SBP, layout = "RevMan5")
 grid.text("SBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
-funnel.meta(meta_SBP,studlab = TRUE,cex.studlab = 1,cex = 2,pch=16,pos.studlab=3,xlim=c(-15,15))
+funnel.meta(meta_SBP,studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c(4,1,2,2,1,1,1,1),xlim=c(-15,15))
 title(main = "SBP Funnel Plot",  cex.main = 1.5,font.main = 1)
 
 # title(main = "Main title", sub = "Sub-title",
@@ -58,7 +54,7 @@ title(main = "SBP Funnel Plot",  cex.main = 1.5,font.main = 1)
 meta_DBP <- metagen(TE = MeanDiff_DBP, seTE = SE_DBP, studlab = Author, data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "DBP", prediction = TRUE)
 forest_DBP <- forest.meta(meta_DBP, layout = "RevMan5")
 grid.text("DBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
-funnel.meta(meta_DBP,  studlab = TRUE,cex.studlab = 1,cex = 2,pch=16,pos.studlab=3,xlim=c(-8,8))
+funnel.meta(meta_DBP,  studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c(4,1,2,2,1,1,1,1),xlim=c(-6,6))
 title(main = "DBP Funnel Plot",  cex.main = 1.5,font.main = 1)
 
 
