@@ -20,8 +20,12 @@ meta$SE_DBP[c(2,7)]=tmp_dbp
 # input SE study ID 1(placebo)
 meta[3,c('SE_SBP','SE_DBP')]=c('3.004','2.593')
 
-# manually change Mean_Diff_SBP& DBP of study ID 5:
+# manually change Mean_Diff_SBP& DBP of study IDs 1&5:
+meta[1,c('MeanDiff_DBP')]=c('-1.8')
+meta[2,c('MeanDiff_SBP','MeanDiff_DBP')]=c('-11.2','-4.9')
+meta[3,c('MeanDiff_SBP')]=c('-1.0')
 meta[7,c('MeanDiff_SBP','MeanDiff_DBP')]=c('-2.54','-3.95')
+
 # extract the first number and omit the content after \n
 meta<-meta %>% mutate_at(c('MeanDiff_SBP','MeanDiff_DBP','SE_SBP','SE_DBP'),~str_extract(.,"-*\\d+.\\d+") %>% as.numeric(.))
 # drop na columns
