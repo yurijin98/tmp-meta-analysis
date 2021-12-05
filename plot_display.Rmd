@@ -1,7 +1,7 @@
 ---
-title: "plot_display"
-author: "Yuli Jin"
-date: "2021/11/21"
+title: "Meta Analysis"
+author: "Rachel Donahue, Yuli Jin, Xiang Li, Boyu Chen, Zhihui Zhang"
+date: "12/10/2021"
 output: pdf_document
 ---
 
@@ -16,9 +16,9 @@ library(stringr)
 library(grid)
 ```
 
-## Data processing
+## Data Processing Results
 
-```{r}
+```{r echo=FALSE}
 data<-read.xlsx("Final Studies_Meta Analysis_1.3.xlsx",startRow = 2)
 meta <- data[,c(1,3,6:8,10:12)]
 names(meta) <- c("StudyID","Author" ,"Size", "MeanDiff_SBP", "MeanDiff_DBP", "SE_SBP", "SE_DBP", "Duration_M")
@@ -35,8 +35,16 @@ meta$SE_DBP[c(2,7)]=tmp_dbp
 # input SE study ID 1(placebo)
 meta[3,c('SE_SBP','SE_DBP')]=c('3.004','2.593')
 
-# manually change Mean_Diff_SBP& DBP of study ID 5:
+# manually change Mean_Diff_SBP& DBP of study IDs 1&5:
+meta[1,c('MeanDiff_DBP')]=c('-1.8')
+meta[2,c('MeanDiff_SBP','MeanDiff_DBP')]=c('-11.2','-4.9')
+meta[3,c('MeanDiff_SBP')]=c('-1.0')
 meta[7,c('MeanDiff_SBP','MeanDiff_DBP')]=c('-2.54','-3.95')
+
+
+#manually change the Duration of study 5:
+meta[7,c('Duration_M')]=c('6')
+
 # extract the first number and omit the content after \n
 meta<-meta %>% mutate_at(c('MeanDiff_SBP','MeanDiff_DBP','SE_SBP','SE_DBP'),~str_extract(.,"-*\\d+.\\d+") %>% as.numeric(.))
 # drop na columns
@@ -45,28 +53,43 @@ meta<-meta[c(!is.na(meta$SE_DBP)),]
 meta$Author<-str_extract(meta$Author,'\\w+')
 # adjust the mean of study ID 6 into -4.8 and -3.2
 meta[8,c('MeanDiff_SBP','MeanDiff_DBP')]=-1*meta[8,c('MeanDiff_SBP','MeanDiff_DBP')]
-knitr::kable(meta,'pipe')
 
 ```
+```{r echo=FALSE}
+knitr::kable(meta,'pipe')
+```
 
-## forest plot & funnel plot
 
-```{r}
+
+## Forest & Funnel Plots
+
+```{r echo=FALSE}
 rownames(meta)<-seq(1:dim(meta)[1])
 meta$Author=paste(rownames(meta),meta$Author,sep='.')
 # ?metagen
 # ?funnel.meta
 meta_SBP <- metagen(TE = MeanDiff_SBP, seTE = SE_SBP, studlab = Author,data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "SBP", prediction = TRUE)
-forest_SBP <- forest.meta(meta_SBP, layout = "RevMan5")
-grid.text("SBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
-funnel.meta(meta_SBP,studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c(4,1,2,2,1,1,1,1),xlim=c(-15,15))
-title(main = "SBP Funnel Plot",  cex.main = 1.5,font.main = 1)
+
 ```
 
 
+```{r echo=FALSE}
+forest_SBP <- forest.meta(meta_SBP, layout = "RevMan5")
+grid.text("SBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
+
+```
+
+```{r echo=FALSE}
+meta_SBP <- metagen(TE = MeanDiff_SBP, seTE = SE_SBP, studlab = Author,data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "SBP", prediction = TRUE)
+funnel.meta(meta_SBP,studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c(4,1,2,2,1,1,1,1),xlim=c(-15,15))
+title(main = "SBP Funnel Plot",  cex.main = 1.5,font.main = 1)
+
+```
+
+This is a fairly balanced funnel plot with an even amount of studies on either side of the mean difference line, and the studies relatively follow the expected funnel shape. The mean difference line is a negative value, which makes sense given that the studies are involving interventions to reduce SBP, it would be unlikely that there would be a study published with a positive mean difference. Overall this plot shows that there does not appear to be any publication bias.
 
 
-```{r}
+```{r echo=FALSE}
 
 meta_DBP <- metagen(TE = MeanDiff_DBP, seTE = SE_DBP, studlab = Author, data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "DBP", prediction = TRUE)
 forest_DBP <- forest.meta(meta_DBP, layout = "RevMan5")
@@ -74,10 +97,11 @@ grid.text("DBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
 funnel.meta(meta_DBP,  studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c(4,1,2,2,1,1,1,1),xlim=c(-6,6))
 title(main = "DBP Funnel Plot",  cex.main = 1.5,font.main = 1)
 ```
+Similar to SBP, this is a fairly balanced funnel plot with an even amount of studies on either side of the mean difference line, and the studies relatively follow the expected funnel shape. The mean difference line is a little higher but still negative value, it seems in one study there was a positive mean difference in DBP after intervention. Overall this plot indicates that there does not appear to be any publication bias.
 
-## Metareg
+## Meta regression
 
-```{r}
+```{r echo=FALSE}
 
 M<-meta$Duration_M%>% as.numeric()
 duration <- M*30
