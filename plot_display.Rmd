@@ -79,8 +79,18 @@ meta_SBP <- metagen(TE = MeanDiff_SBP, seTE = SE_SBP, studlab = Author,data = me
 ```{r echo=FALSE}
 forest_SBP <- forest.meta(meta_SBP, layout = "RevMan5")
 grid.text("SBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
-
 ```
+
+```{r label='SBP_forest_plot_store', eval=FALSE,echo=FALSE}
+# this chunk is used to store jpeg
+jpeg('graph/SBP_forest_plot.jpeg',width = 2200, height = 1100, res=300)
+forest_SBP <- forest.meta(meta_SBP, layout = "RevMan5")
+grid.text("SBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
+dev.off()
+```
+
+
+
 
 ```{r echo=FALSE}
 meta_SBP <- metagen(TE = MeanDiff_SBP, seTE = SE_SBP, studlab = Author,data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "SBP", prediction = TRUE)
@@ -88,6 +98,16 @@ funnel.meta(meta_SBP,studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c
 title(main = "SBP Funnel Plot",  cex.main = 1.5,font.main = 1)
 
 ```
+
+```{r label='SBP_funnel_plot_store',eval=FALSE,echo=FALSE}
+# this chunk is used to store jpeg
+jpeg('graph/SBP_funnel_plot.jpeg',width = 2200, height = 1100, res=300)
+meta_SBP <- metagen(TE = MeanDiff_SBP, seTE = SE_SBP, studlab = Author,data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "SBP", prediction = TRUE)
+funnel.meta(meta_SBP,studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c(4,1,2,1,1,1,1,1),xlim=c(-15,15))
+title(main = "SBP Funnel Plot",  cex.main = 1.5,font.main = 1)
+dev.off()
+```
+
 
 This is a fairly balanced funnel plot with an even amount of studies on either side of the mean difference line, and the studies relatively follow the expected funnel shape. The mean difference line is a negative value, which makes sense given that the studies are involving interventions to reduce SBP, it would be unlikely that there would be a study published with a positive mean difference. Overall this plot shows that there does not appear to be any publication bias.
 
@@ -100,6 +120,24 @@ grid.text("DBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
 funnel.meta(meta_DBP,  studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c(4,1,2,2,1,1,1,1),xlim=c(-6,6))
 title(main = "DBP Funnel Plot",  cex.main = 1.5,font.main = 1)
 ```
+
+```{r label='DBP_store',echo=FALSE,eval=FALSE}
+# this chunk is used to store jpeg
+jpeg('graph/DBP_forest_plot.jpeg',width = 2200, height = 1100, res=300)
+meta_DBP <- metagen(TE = MeanDiff_DBP, seTE = SE_DBP, studlab = Author, data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "DBP", prediction = TRUE)
+forest_DBP <- forest.meta(meta_DBP, layout = "RevMan5")
+grid.text("DBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
+dev.off()
+
+jpeg('graph/DBP_funnel_plot.jpeg',width = 2200, height = 1100, res=300)
+funnel.meta(meta_DBP,  studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c(4,1,2,2,1,1,1,1),xlim=c(-6,6))
+title(main = "DBP Funnel Plot",  cex.main = 1.5,font.main = 1)
+dev.off()
+
+```
+
+
+
 Similar to SBP, this is a fairly balanced funnel plot with an even amount of studies on either side of the mean difference line, and the studies relatively follow the expected funnel shape. The mean difference line is a little higher but still negative value, it seems in one study there was a positive mean difference in DBP after intervention. Overall this plot indicates that there does not appear to be any publication bias.
 
 ## Meta regression
@@ -117,14 +155,25 @@ size <- meta$Size
 meta_SBP_reg <- metareg(meta_SBP, ~duration_m2)
 meta_SBP_reg
 
-bubble(meta_SBP_reg, studlab = TRUE)
+bubble(meta_SBP_reg, studlab = TRUE,xlim=c(-6,25),ylim = c(-12,0),pos.studlab=c(2,2,2,2,1,2,2))
 
 # DBP
 meta_DBP_reg <- metareg(meta_DBP, ~duration_m2)
 meta_DBP_reg
 
-bubble(meta_DBP_reg, studlab = TRUE)
-
-
+bubble(meta_DBP_reg, studlab = TRUE,xlim=c(-6,25),ylim = c(-6,0),pos.studlab=c(1,2,2,4,2,2,2))
 ```
+
+
+```{r label='bubble_store',echo=FALSE,eval=FALSE}
+# this chunk is used to store jpeg
+jpeg('graph/SBP_bubble_plot.jpeg',width = 2200, height = 1100, res=300)
+bubble(meta_SBP_reg, studlab = TRUE,xlim=c(-6,25),ylim = c(-12,0),pos.studlab=c(2,2,2,2,1,2,2))
+dev.off()
+
+jpeg('graph/DBP_bubble_plot.jpeg',width = 2200, height = 1100, res=300)
+bubble(meta_DBP_reg, studlab = TRUE,xlim=c(-6,25),ylim = c(-6,0),pos.studlab=c(1,2,2,4,2,2,2))
+dev.off()
+```
+
 
