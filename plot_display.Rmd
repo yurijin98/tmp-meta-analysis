@@ -16,6 +16,8 @@ library(stringr)
 library(grid)
 ```
 
+This is a report showing the results of a regenerated meta analysis on studies investigating the effects of dietary interventions on hypertension in Sub-Saharan Africa. The first table shows the studies and the data structure that fueled the underlying analysis, and included in this report are funnel plots with interpretations showing that there does not appear to be any publication bias, forest plots, bubble plots and a meta regression. The meta regression was fit with one predictor of study duration, and it has a small affect on SBP and DBP but is not significant.
+
 ## Data Processing Results
 
 ```{r echo=FALSE}
