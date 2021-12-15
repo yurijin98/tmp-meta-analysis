@@ -16,6 +16,8 @@ library(stringr)
 library(grid)
 ```
 
+This is a report showing the results of a regenerated meta analysis on studies investigating the effects of dietary interventions on hypertension in Sub-Saharan Africa. The first table shows the studies and the data structure that fueled the underlying analysis, and included in this report are funnel plots with interpretations showing that there does not appear to be any publication bias, forest plots, bubble plots and a meta regression. The meta regression was fit with one predictor of study duration, and it has a small affect on SBP and DBP but is not significant.
+
 ## Data Processing Results
 
 ```{r echo=FALSE}
@@ -80,6 +82,9 @@ meta_SBP <- metagen(TE = MeanDiff_SBP, seTE = SE_SBP, studlab = Author,data = me
 forest_SBP <- forest.meta(meta_SBP, layout = "RevMan5")
 grid.text("SBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
 ```
+The forest plot shows that the mean difference for SBP is generally negative, the highest weighted study is Study ID 6, Forrester in terms of it's effects on the meta analysis.
+
+
 
 ```{r label='SBP_forest_plot_store', eval=FALSE,echo=FALSE}
 # this chunk is used to store jpeg
@@ -99,6 +104,11 @@ title(main = "SBP Funnel Plot",  cex.main = 1.5,font.main = 1)
 
 ```
 
+
+
+
+
+
 ```{r label='SBP_funnel_plot_store',eval=FALSE,echo=FALSE}
 # this chunk is used to store jpeg
 jpeg('graph/SBP_funnel_plot.jpeg',width = 2200, height = 1100, res=300)
@@ -117,9 +127,15 @@ This is a fairly balanced funnel plot with an even amount of studies on either s
 meta_DBP <- metagen(TE = MeanDiff_DBP, seTE = SE_DBP, studlab = Author, data = meta, sm = "MD", comb.fixed = F, comb.random = T, method.tau = "SJ", title = "DBP", prediction = TRUE)
 forest_DBP <- forest.meta(meta_DBP, layout = "RevMan5")
 grid.text("DBP Forest Plot", .5, .9, gp=gpar(cex=1.5))
+```
+
+This is a forest plot for DBP mean difference, which is also generally negative, and the highest weighted studies are Schouw and Forrester.
+
+```{r echo=FALSE}
 funnel.meta(meta_DBP,  studlab = TRUE,cex.studlab = 1,cex = 1,pch=16,pos.studlab=c(4,1,2,2,1,1,1,1),xlim=c(-6,6))
 title(main = "DBP Funnel Plot",  cex.main = 1.5,font.main = 1)
 ```
+
 
 ```{r label='DBP_store',echo=FALSE,eval=FALSE}
 # this chunk is used to store jpeg
@@ -136,8 +152,6 @@ dev.off()
 
 ```
 
-
-
 Similar to SBP, this is a fairly balanced funnel plot with an even amount of studies on either side of the mean difference line, and the studies relatively follow the expected funnel shape. The mean difference line is a little higher but still negative value, it seems in one study there was a positive mean difference in DBP after intervention. Overall this plot indicates that there does not appear to be any publication bias.
 
 ## Meta regression
@@ -151,17 +165,30 @@ duration_m2 <- M - 2
 duration_lg <- log(duration_m)
 size <- meta$Size
 
+```
+```{r echo=FALSE}
 # SBP
 meta_SBP_reg <- metareg(meta_SBP, ~duration_m2)
 meta_SBP_reg
 
 bubble(meta_SBP_reg, studlab = TRUE,xlim=c(-6,25),ylim = c(-12,0),pos.studlab=c(2,2,2,2,1,2,2))
 
+
+
+
+```
+The coefficient for duration is negative, showing that as the number of days in a study increases, the more DBP decreases on average.The I squared value is at 48.46%, indicating a moderate amount of heterogeneity, indicating that the variation in study outcomes is less likely due to chance.
+
+
+
+```{r echo=FALSE}
 # DBP
 meta_DBP_reg <- metareg(meta_DBP, ~duration_m2)
 meta_DBP_reg
 
 bubble(meta_DBP_reg, studlab = TRUE,xlim=c(-6,25),ylim = c(-6,0),pos.studlab=c(1,2,2,4,2,2,2))
+
+
 ```
 
 
@@ -175,5 +202,6 @@ jpeg('graph/DBP_bubble_plot.jpeg',width = 2200, height = 1100, res=300)
 bubble(meta_DBP_reg, studlab = TRUE,xlim=c(-6,25),ylim = c(-6,0),pos.studlab=c(1,2,2,4,2,2,2))
 dev.off()
 ```
+The coefficient for duration is negative, showing that as the number of days in a study increases, the more DBP decreases on average.The I squared value is at 32.91%, indicating a smaller amount of heterogeneity, that the variation in study outcomes is more likely due to chance.
 
 
